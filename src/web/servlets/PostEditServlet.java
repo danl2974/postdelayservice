@@ -22,6 +22,7 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.*;
 
 import com.welcohealth.DelayPostJob;
 
@@ -31,6 +32,7 @@ public class PostEditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	Logger log = Logger.getLogger(this.getClass().getName());
+	final static org.slf4j.Logger logger = LoggerFactory.getLogger(PostEditServlet.class.getName());
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws IOException, ServletException
@@ -67,6 +69,7 @@ public class PostEditServlet extends HttpServlet {
 	          scheduler.triggerJob(new JobKey(email, "postdelayservice"));
 		      scheduler.deleteJob(new JobKey(email, "postdelayservice"));
 	          out.println(String.format("Scheduled job for %s edited and triggered", email ));
+	          logger.info(String.format("Scheduled job for %s edited and triggered", email ));
 	       }
 	       else{
 	    	   out.println(String.format("No job scheduled for %s to edit",  email)); 

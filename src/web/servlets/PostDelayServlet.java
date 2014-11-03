@@ -22,6 +22,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 
+import org.slf4j.*;
 import com.welcohealth.DelayPostJob;
 
 
@@ -30,6 +31,7 @@ public class PostDelayServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	Logger log = Logger.getLogger(this.getClass().getName());
+	final static org.slf4j.Logger logger = LoggerFactory.getLogger(PostDelayServlet.class.getName());
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws IOException, ServletException
@@ -69,7 +71,8 @@ public class PostDelayServlet extends HttpServlet {
 	        for (Map.Entry<String,String[]> entry : pMap.entrySet()){
 	        	
 	        	out.println("Scheduled delay post with: " + String.format("%s = %s \r\n", entry.getKey(), entry.getValue()[0] ));
-	        	 
+	        	log.info("Scheduled delay post with: " + String.format("%s = %s \r\n", entry.getKey(), entry.getValue()[0] ));
+	        	logger.info("Scheduled delay post with: " + String.format("%s = %s \r\n", entry.getKey(), entry.getValue()[0] ));
 	        }
 	       
        }

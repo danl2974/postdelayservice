@@ -17,12 +17,16 @@ import org.quartz.JobExecutionException;
 
 import java.util.logging.Logger;
 
+import org.slf4j.*;
+
+import web.servlets.PostDelayServlet;
+
 
 public class DelayPostJob implements Job {
 	
 	
 	Logger log = Logger.getLogger(this.getClass().getName());
-	
+	final static org.slf4j.Logger logger = LoggerFactory.getLogger(DelayPostJob.class.getName());
 	
 	@Override
 	public void execute(JobExecutionContext context)
@@ -39,6 +43,7 @@ public class DelayPostJob implements Job {
 	
 		String postResponse = callPost(URLDecoder.decode(jdm.getString("endpoint")), URLDecoder.decode(jdm.getString("requestpath")), qs);
 		log.info("Post Response: " + postResponse);
+		logger.info("Post Response: " + postResponse);
 	}
 	
 	
@@ -67,6 +72,7 @@ public class DelayPostJob implements Job {
 	        	 is = conn.getErrorStream();
 	              for (Map.Entry<String,List<String>> hf : conn.getHeaderFields().entrySet()){
 	            	  log.info("Error " + hf.getKey() + hf.getValue().get(0) );
+	            	  logger.error("Error " + hf.getKey() + hf.getValue().get(0));
 	              }	        	 
 	         }
 	         BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
