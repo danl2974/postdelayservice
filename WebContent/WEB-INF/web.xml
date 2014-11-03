@@ -16,5 +16,15 @@
         <servlet-name>PostDelayServlet</servlet-name>
         <url-pattern>/postdelay</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>PostEditServlet</servlet-name>
+        <servlet-class>web.servlets.PostEditServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>PostEditServlet</servlet-name>
+        <url-pattern>/postedit</url-pattern>
+    </servlet-mapping>
   
 </web-app>

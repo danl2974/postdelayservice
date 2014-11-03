@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
 import org.quartz.SimpleScheduleBuilder;
@@ -25,7 +26,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import com.welcohealth.DelayPostJob;
 
 
-public class PostDelayServlet extends HttpServlet {
+public class PostEditServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -37,40 +38,39 @@ public class PostDelayServlet extends HttpServlet {
 		
 		response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-        
-        Map<String,String[]> pMap = request.getParameterMap();
-        
-        try{
+        Map<String,String[]> pMap = request.getParameterMap(); 
+       try{
     	   String email = pMap.get("email")[0];
-    	   int minutes = Integer.parseInt(pMap.get("delay")[0]);
-    	   long startTime = System.currentTimeMillis() + (minutes * 60000L);
-    	   //String jobId = String.format("%s", email, );
-    	   
+
            SchedulerFactory sf = new StdSchedulerFactory();
 	       Scheduler scheduler = sf.getScheduler();
-	       scheduler.start();
 	       
-	       JobDetail job = JobBuilder.newJob(DelayPostJob.class)
+	       JobDetail jd = scheduler.getJobDetail(new JobKey(email, "postdelayservice"));
+	       JobDataMap incumbentJobMap = jd.getJobDataMap();
+	      
+	       JobDetail newjob = JobBuilder.newJob(DelayPostJob.class)
 				    .withIdentity(email, "postdelayservice")
 				    .build();
 	       
-	       JobDataMap jmd = job.getJobDataMap();
-	       for (Map.Entry<String,String[]> entry : pMap.entrySet()){
-	    	   jmd.put(entry.getKey(), entry.getValue()[0]);
+	       JobDataMap newjmd = newjob.getJobDataMap();
+	       for (Map.Entry<String,Object> entry : incumbentJobMap.entrySet()){
+	    	   newjmd.put(entry.getKey(), entry.getValue());
+	    	   log.info(String.format("%s=%s", entry.getKey(), entry.getValue()));
+	       }
+	       for (Map.Entry<String,String[]> pentry : pMap.entrySet()){
+	    	   newjmd.put(pentry.getKey(), pentry.getValue()[0]);
+	    	   log.info(String.format("%s=%s", pentry.getKey(), pentry.getValue()[0]));
 	       }
 	       
-	       Trigger trigger = TriggerBuilder.newTrigger()
-	    		   .startAt(new Date(startTime))
-	    		   .withIdentity(email, "postdelayservice")
-	    		   .build();
-
-	       scheduler.scheduleJob(job, trigger);
-	       
-	        for (Map.Entry<String,String[]> entry : pMap.entrySet()){
-	        	
-	        	out.println("Scheduled delay post with: " + String.format("%s = %s \r\n", entry.getKey(), entry.getValue()[0] ));
-	        	 
-	        }
+	       if (scheduler.checkExists(new JobKey(email, "postdelayservice"))){
+	          scheduler.addJob(newjob, true, true);
+	          scheduler.triggerJob(new JobKey(email, "postdelayservice"));
+		      scheduler.deleteJob(new JobKey(email, "postdelayservice"));
+	          out.println(String.format("Scheduled job for %s edited and triggered", email ));
+	       }
+	       else{
+	    	   out.println(String.format("No job scheduled for %s to edit",  email)); 
+	       }
 	       
        }
 	   catch(Exception e){
