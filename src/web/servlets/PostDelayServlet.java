@@ -68,13 +68,15 @@ public class PostDelayServlet extends HttpServlet {
 
 	       scheduler.scheduleJob(job, trigger);
 	       
-	        for (Map.Entry<String,String[]> entry : pMap.entrySet()){
+	       StringBuilder sb = new StringBuilder();
+	       for (Map.Entry<String,String[]> entry : pMap.entrySet()){
 	        	
-	        	out.println("Scheduled delay post with: " + String.format("%s = %s \r\n", entry.getKey(), entry.getValue()[0] ));
-	        	log.info("Scheduled delay post with: " + String.format("%s = %s \r\n", entry.getKey(), entry.getValue()[0] ));
-	        	logger.info("Scheduled delay post with: " + String.format("%s = %s \r\n", entry.getKey(), entry.getValue()[0] ));
-	        }
-	       
+	        	sb.append(String.format("%s %s", entry.getKey(), entry.getValue()[0] ));
+	        	
+	       }
+	       out.println("Scheduled delay post with: " + sb.toString());
+	       log.info("Scheduled Delay Post: " + sb.toString());
+	       logger.info("Scheduled Delay Post: " + sb.toString());
        }
 	   catch(Exception e){
 				 out.println(e.getMessage());

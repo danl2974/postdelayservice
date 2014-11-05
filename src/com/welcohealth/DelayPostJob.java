@@ -39,11 +39,11 @@ public class DelayPostJob implements Job {
 			   sb.append(String.format("&%s=%s",detail.getKey(), String.valueOf(detail.getValue()) ));
 			}
 		}
-		String qs = sb.toString();
+		String qs = sb.toString().substring(1);
 	
 		String postResponse = callPost(URLDecoder.decode(jdm.getString("endpoint")), URLDecoder.decode(jdm.getString("requestpath")), qs);
-		log.info("Post Response: " + postResponse);
-		logger.info("Post Response: " + postResponse);
+		log.info("Third Party Post Response: " + postResponse);
+		logger.info("Third Party Post Response: " + postResponse);
 	}
 	
 	
@@ -55,7 +55,6 @@ public class DelayPostJob implements Job {
 		InputStream is = null;
 		try{
 			 String urlString = String.format("%s%s?%s", endpoint, requestpath, requestParams);
-			 log.info(urlString);
 		     URL url = new URL(urlString);
 	         conn = (HttpURLConnection) url.openConnection();
 	         conn.setRequestMethod("GET");
@@ -64,9 +63,11 @@ public class DelayPostJob implements Job {
 	         int response = conn.getResponseCode();
 	         if (response == 200){
 	              is = conn.getInputStream();
+	              /*
 	              for (Map.Entry<String,List<String>> hf : conn.getHeaderFields().entrySet()){
 	            	  log.info("PostResponseHeader " + hf.getKey() + hf.getValue().get(0) );
 	              }
+	              */
 	         }
 	         else{
 	        	 is = conn.getErrorStream();
