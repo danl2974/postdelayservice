@@ -55,6 +55,8 @@ public class DelayPostJob implements Job {
 		InputStream is = null;
 		try{
 			 String urlString = String.format("%s%s?%s", endpoint, requestpath, requestParams);
+			 log.info("Third Party Post Request: " + urlString);
+			 logger.info("Third Party Post Request: " + urlString);
 		     URL url = new URL(urlString);
 	         conn = (HttpURLConnection) url.openConnection();
 	         conn.setRequestMethod("GET");

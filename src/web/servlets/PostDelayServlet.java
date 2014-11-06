@@ -3,6 +3,7 @@ package web.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -21,8 +22,9 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
-
+import org.json.JSONObject;
 import org.slf4j.*;
+
 import com.welcohealth.DelayPostJob;
 
 
@@ -39,6 +41,8 @@ public class PostDelayServlet extends HttpServlet {
 		
 		response.setContentType("text/html");
         PrintWriter out = response.getWriter();
+        JSONObject jsonResponse = new JSONObject();
+        HashMap<String,String> hmresp = new HashMap<String,String>();
         
         Map<String,String[]> pMap = request.getParameterMap();
         
@@ -68,15 +72,16 @@ public class PostDelayServlet extends HttpServlet {
 
 	       scheduler.scheduleJob(job, trigger);
 	       
-	       StringBuilder sb = new StringBuilder();
 	       for (Map.Entry<String,String[]> entry : pMap.entrySet()){
 	        	
-	        	sb.append(String.format("%s %s", entry.getKey(), entry.getValue()[0] ));
+	    	   hmresp.put(entry.getKey(),  entry.getValue()[0]);
+	    	   jsonResponse.put("result",  "ok");
+	    	   jsonResponse.put("request",  hmresp);
 	        	
 	       }
-	       out.println("Scheduled delay post with: " + sb.toString());
-	       log.info("Scheduled Delay Post: " + sb.toString());
-	       logger.info("Scheduled Delay Post: " + sb.toString());
+	       out.println("Scheduled delay post with: " + jsonResponse.toString());
+	       log.info("Scheduled Delay Post: " + jsonResponse.toString());
+	       logger.info("Scheduled Delay Post: " + jsonResponse.toString());
        }
 	   catch(Exception e){
 				 out.println(e.getMessage());
