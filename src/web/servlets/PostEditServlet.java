@@ -38,31 +38,32 @@ public class PostEditServlet extends HttpServlet {
 	throws IOException, ServletException
     {
 		
-		response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
-        Map<String,String[]> pMap = request.getParameterMap(); 
+	   response.setContentType("text/html");
+       PrintWriter out = response.getWriter();
+       Map<String,String[]> pMap = request.getParameterMap();
+       
        try{
     	   String email = pMap.get("email")[0];
 
            SchedulerFactory sf = new StdSchedulerFactory();
 	       Scheduler scheduler = sf.getScheduler();
-	       
-	       JobDetail jd = scheduler.getJobDetail(new JobKey(email, "postdelayservice"));
-	       JobDataMap incumbentJobMap = jd.getJobDataMap();
+	       if (scheduler.checkExists(new JobKey(email, "postdelayservice"))){
+	    	   
+	         JobDetail jd = scheduler.getJobDetail(new JobKey(email, "postdelayservice"));
+	         JobDataMap incumbentJobMap = jd.getJobDataMap();
 	      
-	       JobDetail newjob = JobBuilder.newJob(DelayPostJob.class)
+	         JobDetail newjob = JobBuilder.newJob(DelayPostJob.class)
 				    .withIdentity(email, "postdelayservice")
 				    .build();
 	       
-	       JobDataMap newjmd = newjob.getJobDataMap();
-	       for (Map.Entry<String,Object> entry : incumbentJobMap.entrySet()){
-	    	   newjmd.put(entry.getKey(), entry.getValue());
-	       }
-	       for (Map.Entry<String,String[]> pentry : pMap.entrySet()){
-	    	   newjmd.put(pentry.getKey(), pentry.getValue()[0]);
-	       }
+	          JobDataMap newjmd = newjob.getJobDataMap();
+	          for (Map.Entry<String,Object> entry : incumbentJobMap.entrySet()){
+	    	      newjmd.put(entry.getKey(), entry.getValue());
+	          }
+	          for (Map.Entry<String,String[]> pentry : pMap.entrySet()){
+	    	       newjmd.put(pentry.getKey(), pentry.getValue()[0]);
+	          }
 	       
-	       if (scheduler.checkExists(new JobKey(email, "postdelayservice"))){
 	          scheduler.addJob(newjob, true, true);
 	          scheduler.triggerJob(new JobKey(email, "postdelayservice"));
 		      scheduler.deleteJob(new JobKey(email, "postdelayservice"));
@@ -71,6 +72,7 @@ public class PostEditServlet extends HttpServlet {
 	          log.info(String.format("Scheduled job for %s edited and triggered", email ));
 	          logger.info(String.format("Scheduled job for %s edited and triggered", email ));
 	       }
+	       
 	       else{
 	    	   out.println(String.format("No job scheduled for %s to edit",  email));
 	    	   log.info(String.format("No job scheduled for %s to edit",  email));
@@ -79,7 +81,8 @@ public class PostEditServlet extends HttpServlet {
 	       
        }
 	   catch(Exception e){
-				 out.println(e.getMessage());
+		         log.info("EXCEPTION: "+ e.getMessage());
+				 out.println("ERROR occurred: " + e.getMessage());
 	   }
 		
     }
