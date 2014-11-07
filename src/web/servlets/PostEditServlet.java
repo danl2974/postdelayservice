@@ -2,7 +2,10 @@ package web.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -21,7 +24,9 @@ import org.quartz.SimpleScheduleBuilder;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.*;
 
 import com.welcohealth.DelayPostJob;
@@ -37,10 +42,12 @@ public class PostEditServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws IOException, ServletException
     {
-		
+	
+	   log.info(String.format("PostEdit called: %s",  request.getQueryString() ));
 	   response.setContentType("text/html");
        PrintWriter out = response.getWriter();
        Map<String,String[]> pMap = request.getParameterMap();
+       
        
        try{
     	   String email = pMap.get("email")[0];
@@ -59,14 +66,17 @@ public class PostEditServlet extends HttpServlet {
 	          JobDataMap newjmd = newjob.getJobDataMap();
 	          for (Map.Entry<String,Object> entry : incumbentJobMap.entrySet()){
 	    	      newjmd.put(entry.getKey(), entry.getValue());
+	    	      log.info(String.format("Edit JobData Incumbent added for %s: %s : %s", email,  entry.getKey(), entry.getValue()));
 	          }
 	          for (Map.Entry<String,String[]> pentry : pMap.entrySet()){
 	    	       newjmd.put(pentry.getKey(), pentry.getValue()[0]);
+	    	       log.info(String.format("Edit JobData New added for %s: %s : %s",  email, pentry.getKey(), pentry.getValue()[0] ));
 	          }
-	       
+	          
+	          scheduler.deleteJob(new JobKey(email, "postdelayservice"));
 	          scheduler.addJob(newjob, true, true);
 	          scheduler.triggerJob(new JobKey(email, "postdelayservice"));
-		      scheduler.deleteJob(new JobKey(email, "postdelayservice"));
+	          
 		      
 	          out.println(String.format("Scheduled job for %s edited and triggered", email ));
 	          log.info(String.format("Scheduled job for %s edited and triggered", email ));
@@ -74,10 +84,13 @@ public class PostEditServlet extends HttpServlet {
 	       }
 	       
 	       else{
-	    	   out.println(String.format("No job scheduled for %s to edit",  email));
-	    	   log.info(String.format("No job scheduled for %s to edit",  email));
-	    	   logger.info(String.format("No job scheduled for %s to edit",  email));
+	    	   out.println(String.format("No job scheduled for %s to edit",  pMap.get("email")[0]));
+	    	   log.info(String.format("No job scheduled for %s to edit",  pMap.get("email")[0]));
+	    	   logger.info(String.format("No job scheduled for %s to edit",  pMap.get("email")[0]));
 	       }
+	       
+	       
+	       
 	       
        }
 	   catch(Exception e){
@@ -93,4 +106,6 @@ public class PostEditServlet extends HttpServlet {
 	    doGet(request, response);
 	}
 
+	
+	
 }

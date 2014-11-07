@@ -32,18 +32,24 @@ public class DelayPostJob implements Job {
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
 		
-		StringBuilder sb = new StringBuilder();
-		JobDataMap jdm = context.getJobDetail().getJobDataMap();
-		for (Map.Entry<String, Object> detail: jdm.entrySet()){
+		try{
+		  log.info("Job Execution called: " + context.getJobDetail().getKey().getName());
+		  StringBuilder sb = new StringBuilder();
+		  JobDataMap jdm = context.getJobDetail().getJobDataMap();
+		  for (Map.Entry<String, Object> detail: jdm.entrySet()){
 			if(!(detail.getKey().equals("endpoint")) && !(detail.getKey().equals("requestpath")) ){
 			   sb.append(String.format("&%s=%s",detail.getKey(), String.valueOf(detail.getValue()) ));
-			}
-		}
-		String qs = sb.toString().substring(1);
+			  }
+		  }
+		  String qs = sb.toString().substring(1);
 	
-		String postResponse = callPost(URLDecoder.decode(jdm.getString("endpoint")), URLDecoder.decode(jdm.getString("requestpath")), qs);
-		log.info("Third Party Post Response: " + postResponse);
-		logger.info("Third Party Post Response: " + postResponse);
+		  String postResponse = callPost(URLDecoder.decode(jdm.getString("endpoint")), URLDecoder.decode(jdm.getString("requestpath")), qs);
+		  log.info("Third Party Post Response: " + postResponse);
+		  logger.info("Third Party Post Response: " + postResponse);
+		}
+		catch(Exception ex){
+			   log.info("EXCEPTION Job execute: " + ex.getMessage());    
+		   }
 	}
 	
 	
@@ -73,7 +79,8 @@ public class DelayPostJob implements Job {
 	         }
 	         else{
 	        	 is = conn.getErrorStream();
-	              for (Map.Entry<String,List<String>> hf : conn.getHeaderFields().entrySet()){
+	        	 log.info("Third Party Post Response Error for: " + urlString);
+	             for (Map.Entry<String,List<String>> hf : conn.getHeaderFields().entrySet()){
 	            	  log.info("Error " + hf.getKey() + hf.getValue().get(0) );
 	            	  logger.error("Error " + hf.getKey() + hf.getValue().get(0));
 	              }	        	 
