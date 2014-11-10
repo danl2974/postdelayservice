@@ -69,6 +69,7 @@ public class DelayPostJob implements Job {
 	         conn.setDoInput(true);
 		     conn.connect();
 	         int response = conn.getResponseCode();
+	         log.info(String.format("Third Party Post Response Code: %d", response));
 	         if (response == 200){
 	              is = conn.getInputStream();
 	              /*
